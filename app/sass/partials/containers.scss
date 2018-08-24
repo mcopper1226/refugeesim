@@ -1,0 +1,9 @@
+section {
+  @include section();
+  background: salmon;
+}
+
+.outer-container {
+  @include container();
+  background: crimson;
+}

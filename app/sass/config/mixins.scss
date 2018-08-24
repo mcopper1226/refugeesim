@@ -1,0 +1,202 @@
+@mixin fit {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+@function strip-unit($number) {
+  @if type-of($number) == 'number' and not unitless($number) {
+    @return $number / ($number * 0 + 1);
+  }
+
+  @return $number;
+}
+
+// defaults to standard heading size
+@mixin responsive-font($min-size: ($font-size - 2), $size: $font-size, $limit: $page-limit) {
+  $baseline: $min-mobile;
+  $font-multiplier: (($size - $min-size) / (strip-unit($limit) - strip-unit($baseline)));
+  $font-baseline: ($min-size - $font-multiplier * strip-unit($baseline));
+
+  @if $min-size >= $size {
+    @warn 'Responsive font: min-size equal or greater than size';
+  }
+
+  font-size: #{$min-size}px;
+  font-size: calc(#{$min-size}px * #{var(--scale-multiplier)});
+
+  @media (min-width: $baseline) {
+    font-size: #{$min-size}px;
+    font-size: calc((#{$font-multiplier} * #{100vw} + (#{$font-baseline}px)) * #{var(--scale-multiplier)});
+  }
+
+  @media (min-width: $limit) {
+    font-size: #{$size}px;
+    font-size: calc(#{$size}px * #{var(--scale-multiplier)});
+  }
+}
+
+@mixin section($padding-top: $section-padding, $padding-bottom: $section-padding, $padding-top-mobile: $section-padding-mobile, $padding-bottom-mobile: $section-padding-mobile) {
+  padding-top: $padding-top-mobile;
+  padding-bottom: $padding-bottom-mobile;
+
+  @media (min-width: $min-tablet) {
+    padding-top: percentage(strip-unit($padding-top) / strip-unit($page-limit));
+    padding-bottom: percentage(strip-unit($padding-bottom) / strip-unit($page-limit));
+  }
+
+  @media (min-width: $page-limit) {
+    padding-top: strip-unit($padding-top) * 1px;
+    padding-bottom: strip-unit($padding-bottom) * 1px;
+  }
+}
+
+@mixin container() {
+  margin: 0 auto;
+
+  padding-left: $container-gutter-mobile;
+  padding-right: $container-gutter-mobile;
+
+  max-width: $page-width + $container-gutter-mobile * 1;
+
+  @media (min-width: $min-mobile) {
+    max-width: $page-width + $container-gutter-mobile * 2;
+  }
+
+  @media (min-width: $min-tablet) {
+    padding-left: $container-gutter-tablet;
+    padding-right: $container-gutter-tablet;
+    max-width: $page-width + $container-gutter-tablet * 2;
+  }
+
+  @media (min-width: $min-desktop) {
+    padding-left: $container-gutter-desktop;
+    padding-right: $container-gutter-desktop;
+    max-width: $page-width + $container-gutter-desktop * 2;
+  }
+}
+
+// change below to reflect your project
+@mixin heading($min: ($font-size * 1.5), $max: ($font-size * 3)) {
+  @include reset-heading;
+  @include responsive-font($min, $max);
+
+  $arbitrary-heading-margin: 5;
+  $arbitrary-heading-line-height: 58;
+
+  margin-bottom: (strip-unit($arbitrary-heading-margin) / strip-unit($max)) * 1em;
+
+  font-family: $font-family;
+  font-weight: normal;
+  letter-spacing: 0;
+  line-height: (strip-unit($arbitrary-heading-line-height) / strip-unit($max));
+
+  color: $color-font;
+}
+
+@mixin subheading($min: ($font-size * 1.5), $max: ($font-size * 3)) {
+  @include reset-heading;
+  @include responsive-font($min, $max);
+
+  $arbitrary-subheading-margin: 26;
+  $arbitrary-subheading-line-height: 58;
+
+  margin-bottom: (strip-unit($arbitrary-subheading-margin) / strip-unit($max)) * 1em;
+
+  font-family: $font-family;
+  font-weight: normal;
+  letter-spacing: 0;
+  line-height: (strip-unit($arbitrary-subheading-line-height) / strip-unit($max));
+
+  color: $color-font;
+}
+
+@mixin copy($min: $font-size, $max: ($font-size + 4)) {
+  @include reset-all;
+  @include responsive-font($min, $max);
+
+  $arbitrary-copy-margin: 26;
+  $arbitrary-copy-line-height: 58;
+
+  margin-bottom: (strip-unit($arbitrary-copy-margin) / strip-unit($max)) * 1em;
+
+  font-family: $font-family;
+  font-weight: normal;
+  letter-spacing: 0;
+  line-height: (strip-unit($arbitrary-copy-line-height) / strip-unit($max));
+
+  color: $color-font;
+}
+
+// html.js / html.no-js will not compile?!
+// hence these workaround selectors
+@mixin js-only {
+  html:not(:global(.no-js)) & {
+    @content;
+  }
+}
+
+@mixin no-js {
+  html:not(:global(.js)) & {
+    @content;
+  }
+}
+
+// gsap trans-in defaults
+@mixin will-animate($transform: true, $opacity: true) {
+
+  @include js-only {
+    @if $opacity == true {
+      opacity: 0;
+    }
+
+    @if $transform == true {
+      will-change: opacity, transform;
+    }
+
+    @else {
+      will-change: opacity;
+    }
+  }
+}
+
+
+@mixin flex-grid($sm:null, $med:null, $lg:null, $xl:null, $pad:0) {
+  display: flex;
+  flex-direction: row;
+  flex-flow: wrap;
+  margin-left: -$pad;
+  margin-right: -$pad;
+  list-style: none;
+
+  & > * {
+    padding:$pad;
+    flex-basis: 100%/$sm;
+    max-width: 100%/$sm;
+
+    @media(min-width: $min-720){
+      flex-basis: 100%/$med;
+      max-width: 100%/$med;
+    }
+
+    @if $lg {
+      @media(min-width: $max-960){
+        flex-basis: 100%/$lg;
+        max-width: 100%/$lg;
+      }
+    }
+
+    @if $xl {
+      @media(min-width: $max-1280){
+        flex-basis: 100%/$xl;
+        max-width: 100%/$xl;
+      }
+    }
+  }
+}
+
+@mixin material-shadow() {
+  box-shadow: 1px 1px 15px 6px rgba(0, 0, 0, 0.15);
+}
