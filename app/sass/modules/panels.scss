@@ -388,12 +388,12 @@ hr.small {
   flex: 1;
 }
 .dash__twitterFeed {
-  position: sticky;
+  position: absolute;
   top: 0px;
   width: 450px;
   height: 100vh;
   background: white;
-  overflow: scrolling; 
+  overflow: scroll;
 }
 .icon-sm {
   width: 30px;
